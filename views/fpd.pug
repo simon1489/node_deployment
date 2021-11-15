@@ -1,0 +1,331 @@
+html(style='overflow:hidden')
+    head
+        title='Fancy Product Designer'
+
+        meta(http-equiv='Content-Type' content='text/html; charset=UTF-8')
+        meta(name='viewport' content='width=device-width, initial-scale=1.0')
+
+        //- Style sheets
+        link(rel='stylesheet' type='text/css' href='/static/css/main.css')
+
+        //- The CSS for the plugin itself - required
+        link(rel='stylesheet' type='text/css' href='/static/css/FancyProductDesigner-all.min.css')
+
+        //- Include required jQuery files
+        script(type='text/javascript' src='/static/js/jquery.min.js')
+        script(type='text/javascript' src='/static/js/jquery-ui.min.js')
+
+        //- HTML5 canvas library - required
+        script(type='text/javascript' src='/static/js/fabric.min.js')
+
+        //- The plugin itself - required
+        script(type='text/javascript' src='/static/js/FancyProductDesigner-all.js')
+
+        script.
+            jQuery(document).ready(function()
+            {
+                $(document).find('.modal-backdrop').remove();
+
+                var valueToEdit = '1';
+
+                var $yourDesigner = $('#clothing-designer'),
+                    $pluginOpts = {
+                        productsJSON: "#{apiURL}/designer/products/#{selectedProductID}/#{selectedColor}", //see JSON folder for products sorted in categories
+                        designsJSON: '/static/json/designs.json', //see JSON folder for designs sorted in categories
+                        langJSON: '/static/lang/default.json',
+                        templatesDirectory: '/static/html/',
+                        stageWidth: 1200,
+                        editorMode: false,
+                        smartGuides: true,
+                        fonts: [
+                            {name: 'Helvetica'},
+                            {name: 'Times New Roman'},
+                            {name: 'Arial'}
+                        ],
+                        customTextParameters: {
+                            colors: false,
+                            removable: true,
+                            resizable: true,
+                            draggable: true,
+                            rotatable: true,
+                            autoCenter: true,
+                            boundingBox: "Base"
+                        },
+                        customImageParameters: {
+                            draggable: true,
+                            removable: true,
+                            resizable: true,
+                            rotatable: true,
+                            colors: '#000',
+                            autoCenter: true,
+                            boundingBox: "Base"
+                        },
+                        actions:  {
+                            'top': ['download','print', 'snap', 'preview-lightbox'],
+                            'right': ['magnify-glass', 'zoom', 'reset-product', 'qr-code', 'ruler'],
+                            'bottom': ['undo','redo'],
+                            'left': ['manage-layers','info','save','load']
+                        }
+                    };
+                
+                var $fpd = $('#clothing-designer');
+                var yourDesigner = new FancyProductDesigner($fpd, $pluginOpts);
+
+                // This is going to work like a backup for the default product
+                var $product_base = null;
+
+                //print button
+                $('#print-button').click(function()
+                {
+                    yourDesigner.print();
+                    return false;
+                });
+
+                //create an image
+                $('#image-button').click(function()
+                {
+                    var image = yourDesigner.createImage();
+                    return false;
+                });
+
+                //checkout button with getProduct()
+                $('#checkout-button').click(function(event)
+                {
+                    event.preventDefault();
+
+                    var me = $(this);
+
+                    // To avoid the button be clicked twice
+                    if (me.prop('disabled') == true) return;
+
+                    me.prop('disabled', true);
+
+                    console.log('#checkout-button@click()');
+
+                    // Show modal
+                    yourDesigner.toggleSpinner('show', 'Adding item to cart...');
+
+                    // Get the preview image to show it in the cart
+                    yourDesigner.getProductDataURL(function (dataURL)
+                    {
+                        console.log('#checkout-button@getProductDataURL()');
+
+                        // This timeout it is intentional to avoid running condition
+                        setTimeout(() => {
+
+                            if (dataURL)
+                            {
+                                // Get the current object product with all the layers and images
+                                // This transforms the images to base64
+                                var product = yourDesigner.getProduct();
+
+                                if (product)
+                                {
+                                    // Create a custom object to be passed to the parent (React App)
+                                    var productWithImage = {
+                                        image: dataURL,
+                                        product: product
+                                    };
+
+                                    // Communicating with the top parent (React App)
+                                    window.top.postMessage(JSON.stringify(productWithImage), '*');
+                                }
+                            }
+                            else
+                            {
+                                console.log('Error adding product to cart.');
+
+                                // TODO: show some error message and not clear out the current design
+                            }
+
+                            // Hide modal
+                            yourDesigner.toggleSpinner('hide');
+
+                            // Load the default product
+                            yourDesigner.loadProduct($product_base);
+
+                            me.prop('disabled', false);
+                        
+                        }, 1000);
+
+                    }, undefined, {}, [0, 1]); // These parameters are needed to ensure only show the first view as a preview
+                });
+
+                // To save a existing design from the cart
+                $('#save-edit-button').click(function(event)
+                {
+                    event.preventDefault();
+
+                    var me = $(this);
+
+                    // To avoid the button be clicked twice
+                    if (me.prop('disabled') == true) return;
+
+                    me.prop('disabled', true);
+
+                    console.log('#save-edit-button@click()');
+
+                    // Show modal
+                    yourDesigner.toggleSpinner('show', 'Updating your design...');
+
+                    // Get the preview image to show it in the cart
+                    yourDesigner.getProductDataURL(function (dataURL)
+                    {
+                        console.log('#save-edit-button@getProductDataURL()');
+
+                        // This timeout it is intentional to avoid running condition
+                        setTimeout(() => {
+
+                            if (dataURL)
+                            {
+                                // Get the current object product with all the layers and images
+                                // This transforms the images to base64
+                                var product = yourDesigner.getProduct();
+
+                                if (product)
+                                {
+                                    // Create a custom object to be passed to the parent (React App)
+                                    var productWithImage = {
+                                        isEditing: true,
+                                        image: dataURL,
+                                        product: product
+                                    };
+
+                                    // Communicating with the top parent (React App)
+                                    window.top.postMessage(JSON.stringify(productWithImage), '*');
+                                }
+                            }
+                            else
+                            {
+                                console.log('Error updating product to cart.');
+
+                                // TODO: show some error message and not clear out the current design
+                            }
+
+                            // Hide modal
+                            //yourDesigner.toggleSpinner('hide');
+
+                            // Load the default product
+                            yourDesigner.loadProduct(product);
+
+                            me.prop('disabled', false);
+                        
+                        }, 1000);
+
+                    }, undefined, {}, [0, 1]); // These parameters are needed to ensure only show the first view as a preview
+                });
+
+                //event handler when the price is changing
+                $yourDesigner.on('priceChange', function(evt, price, currentPrice)
+                {
+                    $('#thsirt-price').text(currentPrice);
+                });
+
+                $yourDesigner.on('viewCreate', function()
+                {
+                    $product_base = yourDesigner.getProduct();
+                });
+
+                //save image on webserver
+                $('#save-image-php').click(function()
+                {
+                    yourDesigner.getProductDataURL(function(dataURL) {
+                        $.post( "php/save_image.php", { base64_image: dataURL} );
+                    });
+                });
+
+                //send image via mail
+                $('#send-image-mail-php').click(function()
+                {
+                    yourDesigner.getProductDataURL(function(dataURL) {
+                        $.post( "php/send_image_via_mail.php", { base64_image: dataURL} );
+                    });
+                });
+
+                // This is to request the object to be edited. This request must be done to the 
+                // parent (React App) because the IndexedDB cannot be accessed from here and the
+                // iframe cannot receive an object directly.
+                if (valueToEdit == '#{isEditing}')
+                {
+                    // To avoid running condition
+                    setTimeout(() => {
+                        
+                        setTimeout(() => {
+
+                            // Show modal to notify that the design is going to be loaded
+                            if (yourDesigner && yourDesigner.toggleSpinner)
+                            {
+                                yourDesigner.toggleSpinner('show', 'Loading your design...');
+                            }
+
+                            // Communicating with the top parent to request the product object to be edited
+                            window.top.postMessage("editProduct", '*');
+                            
+                        }, 250);
+                    }, 500);
+                }
+
+                // Function to receive the message from the top parent
+                function receiveMessage(event)
+                {
+                    // TODO: Put here the final origin to avoid no dedired messages from another sources
+                    /*if (event.origin !== "http://example.com")
+                    {
+                        return;
+                    }*/
+
+                    if (!event || !event.data)
+                    {
+                        return;
+                    }
+
+                    console.log('fpd_index.php@receiveMessage()');
+
+                    var data = event.data;
+
+                    if (data === 'productNotFound')
+                    {
+                        alert('Error: The product that you are trying to edit was not found.');
+                        $('#save-edit-button').prop('disabled', true);
+                    }
+                    else if (yourDesigner && yourDesigner.loadProduct)
+                    {
+                        // To avoid running condition
+                        setTimeout(() => {
+
+                            yourDesigner.loadProduct(JSON.parse(data));
+                            yourDesigner.toggleSpinner('hide');
+
+                        }, 750);
+                    }
+                }
+
+                // Subscribe the listener for receiving messages
+                window.addEventListener("message", receiveMessage, false);
+
+                $yourDesigner.on('uiSet', function(event)
+                {
+                    $('#psp-load-fpd').hide();
+                    $('#psp-fpd-buttons').show();
+                });
+            });
+    body
+        div(id='main-container')
+            div(id='psp-load-fpd' class='fpd-container' style='width: 1200px; height: auto; position: absolute')
+                img(src='/static/images/fpd/loader.svg' style='display: block; margin-left: auto; margin-right: auto;' width='10%')
+
+            div(id='clothing-designer' class='fpd-container fpd-topbar fpd-tabs fpd-tabs-side fpd-top-actions-centered fpd-bottom-actions-centered fpd-views-inside-left')
+
+            br
+
+            div(id='psp-fpd-buttons' class='fpd-clearfix' style='margin-top: 30px; display: none')
+                div(class='api-buttons fpd-container fpd-left')
+                    a(href='javascript:void()' id='print-button' class='fpd-btn' style='background-color:#343a40') Print
+                    a(href='javascript:void()' id='image-button' class='fpd-btn' style='background-color:#343a40') Create Image
+
+                    if isEditing === '0'
+                        a(href='javascript:void()' id='checkout-button' class='fpd-btn' style='background-color:#343a40') Add to Cart
+                    else
+                        a(href='javascript:void()' id='save-edit-button' class='fpd-btn' style='background-color:#343a40') Save Design
+
+                    a(href='javascript:void()' id='recreation-button' class='fpd-btn' style='background-color:#343a40') Recreate product
