@@ -94,7 +94,6 @@ const getShippingFee = async (zipCode , weight) => {
 exports.create = (req, res) => {
 
     let form =  new formidable.IncomingForm();
-    
     form.parse(req, async (err, fields) => {
 
         if (err)
@@ -103,24 +102,21 @@ exports.create = (req, res) => {
                 error : 'Error on creating order: Incorrect data'
             });
         }
-
+        console.log('campos:',fields);
         const {
             name,
             phone,
             email,
             addressLine1,
-            addressLine2,
             city,
             state,
             postalCode,
-            orderItems,
-            orderSubtotal,
-            orderTotal,
-            orderWeight,
-            shippingFee
+            product,
+            price, 
+            product_id
         } = fields;
-
-        if (!name || !phone || !email || !addressLine1 || !addressLine2 || !city || !state || !postalCode || !orderItems || !orderTotal || !shippingFee)
+        
+        if (!name || !phone || !email || !addressLine1 || !city || !state || !postalCode || !product || !price || !product_id)
         {
             return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
         }
@@ -132,11 +128,11 @@ exports.create = (req, res) => {
         let _orderQty = 0;
         let _weight = 0;
         let discardItems = [];
-
-        if (orderItems !== undefined)
+        
+        if (product !== undefined)
         {
-            _orderItems = JSON.parse(orderItems);
-
+            _orderItems = JSON.parse(product);
+            //console.log('_orderItems',_orderItems);
             if (_orderItems.length === 0)
             {
                 return res.status(400).json({
@@ -161,7 +157,7 @@ exports.create = (req, res) => {
                     else
                     {
                         const product = await findProductByID(productTypeID);
-
+                        //console.log('PRODUCT.....:',product)
                         if (!product)
                         {
                             missingItemsData = true;
@@ -200,26 +196,27 @@ exports.create = (req, res) => {
             });
         }
 
-        _orderShippingFee = await getShippingFee(postalCode, Math.ceil(_weight));
+        //_orderShippingFee = await getShippingFee(postalCode, Math.ceil(_weight));
 
         let _order = {
             order_date: moment().format(),
-            order_total: _orderSubTotal + _orderShippingFee,
+            order_total: price,
             order_subtotal: _orderSubTotal,
             order_shipping_fee: _orderShippingFee,
             order_qty: _orderQty,
             customer_name: name,
             customer_email: email,
             customer_addressLine1: addressLine1,
-            customer_addressLine2: addressLine2,
             customer_phone: phone,
             customer_city: city,
             customer_state: state,
             customer_zipCode: postalCode,
+            product: product,
+            product_id: product_id,
         };
         
         let order = new Order(_order);
-
+        console.log('order:',order)
         order.save((err, data) => {
 
             if(err)
@@ -228,40 +225,7 @@ exports.create = (req, res) => {
                     error : errorHandler(err)
                 });
             }
-            else
-            {
-                _orderItems.map(orderItemRow => {
-
-                    let mustBeDiscarded = discardItems.filter(row => orderItemRow.id === row.id).length > 0;
-
-                    if (mustBeDiscarded === false)
-                    {      
-                        
-                        let _orderItem = {
-                            order_id: data._id,
-                            guid: orderItemRow.guid,
-                            product_id: orderItemRow.productType,
-                            qty: orderItemRow.qty,
-                            price: orderItemRow.price,
-                            color: orderItemRow.color,
-                            size: orderItemRow.size,
-                            product_obj: orderItemRow.product
-                        }
-
-                        let orderItem = new OrderItem(_orderItem);
-
-                        orderItem.save((err, orderItemData) => {
-
-                            if (err)
-                            {
-                                return res.status(400).json({
-                                    error : errorHandler(err)
-                                });
-                            }
-                        });
-                    }
-                });
-            }
+            
        
             res.status(201).json(data);            
         });

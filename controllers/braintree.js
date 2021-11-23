@@ -61,13 +61,13 @@ exports.processPayment = (req, res) => {
             return utils.errorResponse(res, 'ORDER_TOTAL_GREATER_ZERO');
         }
 
-        let zipCode = order.customer_zipCode;
-        let orderShippingFee = await getShippingFee(zipCode, 2);   
-        console.log(orderShippingFee)     
+        //let zipCode = order.customer_zipCode;
+        //let orderShippingFee = await getShippingFee(zipCode, 2);   
+        //console.log(orderShippingFee)     
 
         gateway.transaction.sale(
             {
-                amount: (parseFloat(order.order_subtotal) + parseFloat(orderShippingFee)).toFixed(2),
+                amount: (parseFloat(order.order_total)),
                 paymentMethodNonce: nonceFromTheClient,
                 options: {
                     submitForSettlement: true

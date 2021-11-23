@@ -9,6 +9,7 @@ const {errorHandler} = require('../helpers/dbErrorHandler');
 
 //Middleware for get product by product id
 exports.productById = (req, res, next, id) => {
+    console.log('pase por findByOne');
     Product.findById(id)
         .exec((err, product) => {
             if (err || !product) {
@@ -61,10 +62,10 @@ exports.create = (req, res) => {
                 error : 'Error on recieved data'
             });
         }
+        
+        const { name, descr, category, price, qty, weight } = fields;
 
-        const { name, descr, price, category, qty, weight } = fields;
-
-        if (!name || !descr || !price || !category || !qty || !weight) {
+        if (!name || !descr || !category) {
             return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
         }
         

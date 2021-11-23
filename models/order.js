@@ -9,6 +9,17 @@ const orderSchema = new mongoose.Schema(
             default: null,
         },
 
+        product: {
+            type: String,
+            required: true,
+        },
+
+        product_id: {
+            type: String,
+            required: true,
+        },
+
+
         status: {
             type: String,
             enum: ['pending_payment', 'open', 'hold', 'processed', 'shipped', 'completed', 'canceled'],
@@ -33,18 +44,7 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        order_subtotal: {
-            type: Number,
-            required: true,
-        },
-        order_shipping_fee: {
-            type: Number,
-            required: true,
-        },
-        order_qty: {
-            type: Number,
-            required: true,
-        },
+       
 
         payment_method: {
             type: String,
@@ -75,12 +75,6 @@ const orderSchema = new mongoose.Schema(
             trim: true,
             maxlength: 256,
             required: true,
-        },
-
-        customer_addressLine2: {
-            type: String,
-            trim: true,
-            maxlength: 256,
         },
 
         customer_phone: {

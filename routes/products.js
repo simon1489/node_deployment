@@ -13,7 +13,7 @@ const {
 //ADMIN PRODUCT ROUTES
 router.post("/products", isAuth, isAdmin, create);
 
-router.get("/products/:productId", isAuth, isAdmin, read);
+router.get("/products/:productId",  read);
 
 router.delete("/products/:productId", isAuth, isAdmin, remove);
 router.put("/products/:productId", isAuth, isAdmin, update);
