@@ -9,7 +9,7 @@ const {errorHandler} = require('../helpers/dbErrorHandler');
 
 //Middleware for get product by product id
 exports.productById = (req, res, next, id) => {
-    console.log('pase por findByOne');
+    console.log('pase por findByOne id:', id);
     Product.findById(id)
         .exec((err, product) => {
             if (err || !product) {
@@ -54,6 +54,7 @@ exports.productByIdWithViews = (req, res, next, id) => {
 //CREATE PRODUCT
 exports.create = (req, res) => {
     let form =  new formidable.IncomingForm();
+    form.uploadDir="images/products";
     form.keepExtensions = true;
     form.parse(req, (err,fields,files) => {
 
