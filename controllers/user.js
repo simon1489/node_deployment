@@ -35,8 +35,8 @@ exports.read = (req, res) => {
 
 exports.update = (req, res) => {
     // console.log('UPDATE USER - req.user', req.user, 'UPDATE DATA', req.body);
-    const { name, phoneNumber, password, street, suite, city, postalCode, country, state } = req.body;
-
+    const { name, phoneNumber, password, street, suite, city, postalCode, country, state, isConfirmed } = req.body;
+    
     User.findOne({ _id: req.profile._id }, (err, user) => {
         if (err || !user) {
             return res.status(400).json({
@@ -87,6 +87,10 @@ exports.update = (req, res) => {
             } else {
                 user.password = password;
             }
+        }
+
+        if(isConfirmed){
+            user.isConfirmed = isConfirmed;
         }
 
         user.save((err, updatedUser) => {

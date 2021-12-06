@@ -29,8 +29,21 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ['admin', 'customer'],
+            enum: ['root', 'admin', 'customer', 'worker'],
             default: 'customer'
+        },
+        local: {
+            type: String,
+            trim: true
+        },
+        isConfirmed: {
+            type: Boolean,
+            default: false,
+        },
+        emailPaypal: {
+            type: String,
+            trim: true,
+            unique: true
         },
         street: {
             type: String,

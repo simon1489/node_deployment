@@ -6,6 +6,9 @@ const {MAX_FILE_SIZE} = require('../utils/values');
 const Product = require('../models/product');
 const ProductView = require('../models/productView');
 const {errorHandler} = require('../helpers/dbErrorHandler');
+//////Include User for create user login
+const User = require('../models/user');
+
 
 //Middleware for get product by product id
 exports.productById = (req, res, next, id) => {
@@ -65,7 +68,7 @@ exports.create = (req, res) => {
         }
         
         const { name, descr, category, price, qty, weight } = fields;
-
+        console.log('fields:', fields);
         if (!name || !descr || !category) {
             return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
         }
@@ -110,10 +113,28 @@ exports.create = (req, res) => {
                 return res.status(400).json({
                     error : errorHandler(err)
                 });
-            }            
+            }   
+            console.log("product created", data);
+
+
+            const user = new User(fields);
+
+            user.save((err,user) => {
+                if(err){
+                    console.log(err);
+                    res.status(400).json({
+                        error : errorHandler(err)
+                    });
+                }else{
+                    console.log("User created", user);
+        
+                    res.status(201).json(user);
+                }
+            });
        
-            res.status(201).json(data);            
+                       
         });
+
     });
 }
 

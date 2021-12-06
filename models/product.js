@@ -23,12 +23,27 @@ const productSchema = new mongoose.Schema(
             required: true,
             default: 0
         },
+        email: {
+            type: String,
+            trim: true,
+            unique: true
+        },
+        emailPaypal: {
+            type: String,
+            trim: true,
+            unique: true
+        },
+
         sold_qty: {
             type: Number,
             required: true,
             default: 0
         },
         imageURL: {
+            type: String,
+            trim: true,
+        },
+        local: {
             type: String,
             trim: true,
         },

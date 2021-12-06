@@ -49,7 +49,7 @@ exports.signin = (req, res) => {
         if (!user) {
             return utils.errorResponse(res, 'USER_NOT_EXIST');
         }
-
+        console.log('user',user)
         user.comparePassword(password, function(err, match) {
             if (err) {
                 return utils.errorResponse(res, 'INTERNAL_ERROR', err);
@@ -58,8 +58,8 @@ exports.signin = (req, res) => {
             if (!match) {
                 return utils.errorResponse(res, 'BAD_CREDENTIALS');
             }
-            console.log('user',user)
-            const {_id, name, email, role} = user;
+            
+            const {_id, name, email, role, isConfirmed} = user;
             return res.status(200).json({ 
                 token:generateToken({
                     _doc: {
@@ -72,7 +72,8 @@ exports.signin = (req, res) => {
                     _id, 
                     email, 
                     name, 
-                    role
+                    role,
+                    isConfirmed
                 }   
             });
         });

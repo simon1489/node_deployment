@@ -30,22 +30,68 @@ exports.orderById = (req, res, next, id) => {
     });
 };
 
-exports.orderByIdWithItems = (req, res) => {
-    let order = req.order;
+//GET ORDERS LIST 
+exports.list = (req, res) => {
+    //let user_id = req.params.userId;
+    Order.find()
+    .exec((err, order) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err)
+            });
+        }
+        res.json(order);
+    });
+};
 
+exports.orderByIdWithItems = (req, res) => {
+   
+    let order = req.order;
+    
     OrderItem.find({order_id: order._id})
     .select()
+    .populate('product_id', '_id name printingType')
     .exec((err, orderItems) => {
-
         if (err)
         {
             return res.status(400).json({
                 error: 'Order Items not found'
             });
-        }       
-        
+        }    
         return res.json({order, orderItems});  
     });     
+};
+
+exports.ordersByProductId = (req, res) => {
+    let productId = req.params.productId;
+
+    Order.find({product_id: productId})
+    .select()
+    .exec((err, orders) => {
+
+        if (err)
+        {
+            return res.status(400).json({
+                error: 'Ordes not found'
+            });
+        }       
+        
+        return res.json({orders});  
+    });     
+};
+
+exports.listByUser = (req, res) => {
+    let user_id = req.params.userId;
+    Order.find({user_id: user_id})
+    .exec((err, order) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err)
+            });
+        }
+        console.log('order',order)
+        res.json(order);
+    });
 };
 
 const findProductByID = async (productID) => {
