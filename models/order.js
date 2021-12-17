@@ -19,6 +19,45 @@ const orderSchema = new mongoose.Schema(
             required: true,
         },
 
+        term: {
+            type: Number,
+        },
+
+        trFee: {
+            type: Number,
+            required: true,
+        },
+
+        dish: {
+            type: Number,
+            required: true,
+        },
+
+        tasty: {
+            type: Number,
+            required: true,
+        },
+
+        atmosphere: {
+            type: Number,
+            required: true,
+        },
+
+        goodService: {
+            type: Number,
+            required: true,
+        },
+
+        porcent: {
+            type: Number,
+            required: true,
+        },
+
+        valueStar: {
+            type: Number,
+            required: true,
+        },
+
 
         status: {
             type: String,
@@ -33,7 +72,7 @@ const orderSchema = new mongoose.Schema(
 
         order_date: {
             type: Date,
-            required: true,
+            
         },
 
         shipped_date: {
@@ -42,7 +81,7 @@ const orderSchema = new mongoose.Schema(
 
         order_total: {
             type: Number,
-            required: true,
+            
         },
        
 
@@ -60,53 +99,45 @@ const orderSchema = new mongoose.Schema(
         customer_name: {
             type: String,
             trim: true,
-            required: true,
             maxlength: 128,
         },
 
         customer_email: {
             type: String,
             trim: true,
-            required: true,
         },
 
         customer_addressLine1: {
             type: String,
             trim: true,
             maxlength: 256,
-            required: true,
         },
 
         customer_phone: {
             type: String,
             trim: true,
-            required: true,
         },
 
         customer_city: {
             type: String,
             trim: true,
             maxlength: 128,
-            required: true,
         },
 
         customer_state: {
             type: String,
             maxlength: 128,
-            required: true,
         },
 
         customer_zipCode: {
             type: String,
             trim: true,
             maxlength: 128,
-            required: true,
         },
 
         customer_country: {
             type: String,
             maxlength: 128,
-            required: true,
             default: 'United States',
         },
     },

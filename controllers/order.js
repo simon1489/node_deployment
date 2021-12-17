@@ -148,6 +148,7 @@ exports.create = (req, res) => {
                 error : 'Error on creating order: Incorrect data'
             });
         }
+
         console.log('campos:',fields);
         const {
             name,
@@ -156,6 +157,14 @@ exports.create = (req, res) => {
             addressLine1,
             city,
             state,
+            term,
+            trFee,
+            valueStar,
+            dish,
+            tasty,
+            atmosphere,
+            goodService,
+            porcent,
             postalCode,
             product,
             price, 
@@ -164,7 +173,7 @@ exports.create = (req, res) => {
         
         if (!name || !phone || !email || !addressLine1 || !city || !state || !postalCode || !product || !price || !product_id)
         {
-            return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
+            //return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
         }
 
         let _orderItems;
@@ -243,20 +252,35 @@ exports.create = (req, res) => {
         }
 
         //_orderShippingFee = await getShippingFee(postalCode, Math.ceil(_weight));
-
+/*   term,
+            trFee,
+            valueStar,
+            dish,
+            tasty,
+            goodService,
+            porcent,*/
         let _order = {
             order_date: moment().format(),
             order_total: price,
             order_subtotal: _orderSubTotal,
-            order_shipping_fee: _orderShippingFee,
+            trFee: trFee,
+            term: term,
+            dish: dish,
+            tasty: tasty,
+            goodService: goodService,
+            atmosphere: atmosphere,
+            porcent: porcent,
+            valueStar: valueStar,
+
+            //order_shipping_fee: _orderShippingFee,
             order_qty: _orderQty,
-            customer_name: name,
-            customer_email: email,
-            customer_addressLine1: addressLine1,
-            customer_phone: phone,
-            customer_city: city,
-            customer_state: state,
-            customer_zipCode: postalCode,
+           // customer_name: name,
+           // customer_email: email,
+           // customer_addressLine1: addressLine1,
+           // customer_phone: phone,
+           // customer_city: city,
+          //  customer_state: state,
+          ///  customer_zipCode: postalCode,
             product: product,
             product_id: product_id,
         };
