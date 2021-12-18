@@ -38,6 +38,7 @@ const shipping = require('./routes/shipping');
 const productRating = require('./routes/productRating');
 
 //DB Connection
+mongoose.set('useFindAndModify', false);
 mongoose.connect(
     process.env.MONGO_URI,
     {

@@ -7,7 +7,7 @@ const {errorHandler} = require('../helpers/dbErrorHandler');
 exports.ratingByProductId = (req, res) => {
     let product_id = req.params.productId;
     ProductRating.find({product: product_id})
-    .populate('user', '_id name')
+    .populate('_id name')
     .exec((err, productRating) => {
         if (err) {
             return res.status(400).json({
@@ -45,12 +45,12 @@ exports.create = async (req, res) => {
         return res.status(401).json({message: 'MISSING_REQUIRED_FIELDS'})
     }
     const productRating = new ProductRating(req.body);
-    if (user) {
-        const ratingFound = await ProductRating.findOne({user: user , product: product});
-        if (ratingFound) {
-            return res.status(301).json({message: 'The rating already exist'})
-        }
-    }
+    //if (user) {
+        //const ratingFound = await ProductRating.findOne({user: user , product: product});
+        //if (ratingFound) {
+        //    return res.status(301).json({message: 'The rating already exist'})
+        //}
+    //}
     
     
     
