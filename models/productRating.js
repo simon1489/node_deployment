@@ -8,10 +8,10 @@ const productRatingSchema = new mongoose.Schema(
             required: true,
         },
         review: {
-            type: String,
+            type: Array,
             trim: true,
             required: true,
-            maxlength: 256
+            
         },
         product: {
             type: ObjectId,
@@ -22,7 +22,6 @@ const productRatingSchema = new mongoose.Schema(
         user: {
             type: ObjectId,
             ref: 'User',
-            required: true,
             index: true
         }
     },
