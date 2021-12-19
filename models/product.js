@@ -34,6 +34,12 @@ const productSchema = new mongoose.Schema(
             unique: true
         },
 
+        owner_user_id: {
+            type: String,
+            trim: true,
+            required: true
+        },
+
         sold_qty: {
             type: Number,
             required: true,

@@ -149,7 +149,7 @@ exports.create = (req, res) => {
             });
         }
 
-        console.log('campos:',fields);
+        //console.log('campos:',fields);
         const {
             name,
             phone,
@@ -286,7 +286,7 @@ exports.create = (req, res) => {
         };
         
         let order = new Order(_order);
-        console.log('order:',order)
+        //console.log('order:',order)
         order.save((err, data) => {
 
             if(err)

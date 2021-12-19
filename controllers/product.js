@@ -1,11 +1,11 @@
 const formidable = require('formidable');
 const _ = require('lodash');
 const fs = require('fs');
-const {errorResponse} = require('../utils');
-const {MAX_FILE_SIZE} = require('../utils/values');
+const { errorResponse } = require('../utils');
+const { MAX_FILE_SIZE } = require('../utils/values');
 const Product = require('../models/product');
 const ProductView = require('../models/productView');
-const {errorHandler} = require('../helpers/dbErrorHandler');
+const { errorHandler } = require('../helpers/dbErrorHandler');
 //////Include User for create user login
 const User = require('../models/user');
 
@@ -33,13 +33,13 @@ exports.productByIdWithViews = (req, res, next, id) => {
                     error: 'Product not found'
                 });
             }
-            req.product = product;      
-           
-            if (!req.product){
+            req.product = product;
+
+            if (!req.product) {
                 next();
             }
 
-            ProductView.find({product : product})
+            ProductView.find({ product: product })
                 .select()
                 .exec((err, productViews) => {
                     if (err) {
@@ -51,89 +51,88 @@ exports.productByIdWithViews = (req, res, next, id) => {
                     next();
                 });
 
-        });        
+        });
 };
 
 //CREATE PRODUCT
 exports.create = (req, res) => {
-    let form =  new formidable.IncomingForm();
-    form.uploadDir="images/products";
+    let form = new formidable.IncomingForm();
+    form.uploadDir = "images/products";
     form.keepExtensions = true;
-    form.parse(req, (err,fields,files) => {
+    form.parse(req, (err, fields, files) => {
 
-        if(err){
+        if (err) {
             return res.status(400).json({
-                error : 'Error on recieved data'
+                error: 'Error on recieved data'
             });
         }
-        
-        const { name, descr, category, price, qty, weight } = fields;
-        console.log('fields:', fields);
-        if (!name || !descr || !category) {
-            return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
-        }
-        
-        if (fields.colorList !== undefined)
-        {
-            fields.colorList = JSON.parse(fields.colorList);
-        }
 
-        if (fields.sizeList !== undefined)
-        {
-            fields.sizeList = JSON.parse(fields.sizeList);
-        }
-        
-        let product = new Product(fields);
+        /////Create USER
 
-        if(files.image){  
-            const imageType = files.image.type.split('/').pop();  
-            const acceptedImageTypes = ["png", "jpg", "jpeg", "svg"];
-            const imageURL = `images/products/${product._id}.${imageType}`;
+        const user = new User(fields);
 
-            if (files.image.size > MAX_FILE_SIZE) {
-                return errorResponse(res, 'FILE_TOO_LARGE');
-            }
-
-            if (!acceptedImageTypes.includes(imageType)) {
-                return errorResponse(res, 'UNSUPPORTED_EXTENSIONS');
-            }       
-            
-            fs.rename(files.image.path, imageURL, (error) => {
-                if(error){
-                    console.log(error);
-                }              
-            });  
-
-            product.imageURL = imageURL;
-            product.imageType = imageType;          
-        }
-
-        product.save((err,data) => {
-            if(err){
-                return res.status(400).json({
-                    error : errorHandler(err)
+        user.save((err, user) => {
+            if (err) {
+                console.log(err);
+                res.status(400).json({
+                    error: errorHandler(err)
                 });
-            }   
-            console.log("product created", data);
-
-
-            const user = new User(fields);
-
-            user.save((err,user) => {
-                if(err){
-                    console.log(err);
-                    res.status(400).json({
-                        error : errorHandler(err)
-                    });
-                }else{
-                    console.log("User created", user);
-        
-                    res.status(201).json(user);
+            } else {
+                console.log("User created", user);
+                const owner_user_id = { owner_user_id: user._id };
+                const { name, descr, category, price, qty, weigh } = fields;
+                if (!name || !descr || !category) {
+                    return errorResponse(res, 'MISSING_REQUIRED_FIELDS');
                 }
-            });
-       
-                       
+
+                if (fields.colorList !== undefined) {
+                    fields.colorList = JSON.parse(fields.colorList);
+                }
+
+                if (fields.sizeList !== undefined) {
+                    fields.sizeList = JSON.parse(fields.sizeList);
+                }
+                const fields2 = {
+                    ...fields,
+                    ...owner_user_id
+                };
+                let product = new Product(fields2);
+                if (files.image) {
+                    const imageType = files.image.type.split('/').pop();
+                    const acceptedImageTypes = ["png", "jpg", "jpeg", "svg"];
+                    const imageURL = `images/products/${product._id}.${imageType}`;
+
+                    if (files.image.size > MAX_FILE_SIZE) {
+                        return errorResponse(res, 'FILE_TOO_LARGE');
+                    }
+
+                    if (!acceptedImageTypes.includes(imageType)) {
+                        return errorResponse(res, 'UNSUPPORTED_EXTENSIONS');
+                    }
+
+                    fs.rename(files.image.path, imageURL, (error) => {
+                        if (error) {
+                            console.log(error);
+                        }
+                    });
+
+                    product.imageURL = imageURL;
+                    product.imageType = imageType;
+                }
+
+                product.save((err, data) => {
+                    if (err) {
+                        return res.status(400).json({
+                            error: errorHandler(err)
+                        });
+                    }
+                    res.status(201).json(data);
+                });
+
+            }
         });
+
+
 
     });
 }
@@ -160,8 +159,8 @@ exports.update = (req, res) => {
         fields.sizeList = JSON.parse(fields.sizeList);
         product = _.extend(product, fields);
 
-        if(files.image){  
-            const imageType = files.image.type.split('/').pop();  
+        if (files.image) {
+            const imageType = files.image.type.split('/').pop();
             const acceptedImageTypes = ["png", "jpg", "jpeg", "svg"];
             const imageURL = `images/products/${product._id}.${imageType}`;
 
@@ -171,16 +170,16 @@ exports.update = (req, res) => {
 
             if (!acceptedImageTypes.includes(imageType)) {
                 return errorResponse(res, 'UNSUPPORTED_EXTENSIONS');
-            }       
-            
+            }
+
             fs.rename(files.image.path, imageURL, (error) => {
-                if(error){
+                if (error) {
                     console.log(error);
-                }              
-            });  
+                }
+            });
 
             product.imageURL = imageURL;
-            product.imageType = imageType;          
+            product.imageType = imageType;
         }
 
         product.save((err, result) => {
@@ -204,15 +203,15 @@ exports.remove = (req, res) => {
             return res.status(400).json({
                 error: errorHandler(err)
             });
-        }        
+        }
 
-        if(imageURL){
+        if (imageURL) {
             fs.unlink(imageURL, (error) => {
-                if(error){ console.log(error); }
+                if (error) { console.log(error); }
             });
         }
 
-        ProductView.remove({product : product}, function(err) {console.log(err)})
+        ProductView.remove({ product: product }, function (err) { console.log(err) })
 
         res.json({
             message: 'Product deleted successfully'
@@ -220,29 +219,48 @@ exports.remove = (req, res) => {
     });
 };
 
+
+//GET BY LOGIN ID
+exports.getByLoginId = (req, res) => {
+
+    let id = req.params.owner_user_id
+    Product.find({ owner_user_id: id })
+        .select()
+        .populate({ path: 'category', select: '_id name printingType', populate: { path: 'printingType' } })
+        .populate({ path: 'mainView', select: '_id imageBaseURL imageShadowsURL imageHighlightsURL' })
+        .exec((err, eproduct) => {
+            if (err) {
+                return res.status(400).json({
+                    error: 'Product not found'
+                });
+            }
+            res.json(eproduct);
+        });
+};
+
+
 //LIST PRODUCTS
 exports.list = (req, res) => {
 
     let order = req.query.order ? req.query.order : 'asc';
     let sortBy = req.query.sortBy ? req.query.sortBy : '_id';
-    const queryFilter = req.query.printingType ? {printingType : req.query.printingType} : {};
+    const queryFilter = req.query.printingType ? { printingType: req.query.printingType } : {};
 
     Product.find(queryFilter)
-    .select()
-    .populate({path:'category',select:'_id name printingType', populate:{path:'printingType'}})
-    .populate({path:'mainView', select:'_id imageBaseURL imageShadowsURL imageHighlightsURL'})
-    .sort([[sortBy, order]])
-    .exec((err, products) => {
+        .select()
+        .populate({ path: 'category', select: '_id name printingType', populate: { path: 'printingType' } })
+        .populate({ path: 'mainView', select: '_id imageBaseURL imageShadowsURL imageHighlightsURL' })
+        .sort([[sortBy, order]])
+        .exec((err, products) => {
 
-        if (err)
-        {
-            return res.status(400).json({
-                error: 'Products not found'
-            });
-        }
-        
-        res.json(products);
-    });
+            if (err) {
+                return res.status(400).json({
+                    error: 'Products not found'
+                });
+            }
+
+            res.json(products);
+        });
 };
 
 exports.decreaseQuantity = (req, res, next) => {
