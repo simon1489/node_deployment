@@ -7,7 +7,7 @@ const {errorHandler} = require('../helpers/dbErrorHandler');
 exports.ratingByProductId = (req, res) => {
     let product_id = req.params.productId;
     ProductRating.find({product: product_id})
-    .populate('_id name')
+    .populate('user', '_id name')
     .exec((err, productRating) => {
         if (err) {
             return res.status(400).json({
