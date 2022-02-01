@@ -12,11 +12,20 @@ const {
 } = require('../controllers/product');
 
 //ADMIN PRODUCT ROUTES
-router.post("/products", isAuth, isAdmin, create);
+//router.post("/products", isAuth, isAdmin, create);
+//router.get("/products/login/:owner_user_id", getByLoginId);
+//router.get("/products/:productId",  read);
+//router.delete("/products/:productId", isAuth, isAdmin, remove);
+//router.put("/products/:productId", isAuth, isAdmin, update);
+
+router.post("/products", create);
 router.get("/products/login/:owner_user_id", getByLoginId);
 router.get("/products/:productId",  read);
-router.delete("/products/:productId", isAuth, isAdmin, remove);
-router.put("/products/:productId", isAuth, isAdmin, update);
+router.delete("/products/:productId", remove);
+router.put("/products/:productId", update);
+
+
+
 //ECOMMERCE PRODUCTS ROUTE
 router.get("/products", list);
 

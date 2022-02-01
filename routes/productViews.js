@@ -12,10 +12,19 @@ const {
 } = require('../controllers/productView');
 
 //ADMIN PRODUCT ROUTES
-router.post("/products/:productId/productViews", isAuth, isAdmin, create);
-router.get("/products/:productId/productViews", isAuth, isAdmin, list);
-router.delete("/products/:productId/productViews/:productViewId", isAuth, isAdmin, remove);
-router.put("/products/:productId/productViews/:productViewId", isAuth, isAdmin, update);
+//router.post("/products/:productId/productViews", isAuth, isAdmin, create);
+//router.get("/products/:productId/productViews", isAuth, isAdmin, list);
+//router.delete("/products/:productId/productViews/:productViewId", isAuth, isAdmin, remove);
+//router.put("/products/:productId/productViews/:productViewId", isAuth, isAdmin, update);
+
+
+router.post("/products/:productId/productViews", create);
+router.get("/products/:productId/productViews", list);
+router.delete("/products/:productId/productViews/:productViewId", remove);
+router.put("/products/:productId/productViews/:productViewId", update);
+
+
+
 
 router.param('productViewId', productViewById);
 router.param('productId', productById);

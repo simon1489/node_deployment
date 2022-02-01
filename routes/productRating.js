@@ -12,6 +12,8 @@ const {
 router.get("/rating/products/:productId/user/:userId", ratingByProductIdAndUser);
 router.get("/rating/products/:productId", ratingByProductId);
 router.post("/rating", create);
-router.delete("/rating", isAuth, isAdmin, remove);
+
+//router.delete("/rating", isAuth, isAdmin, remove);
+router.delete("/rating", remove);
 
 module.exports = router;
